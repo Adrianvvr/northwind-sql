@@ -162,18 +162,22 @@ ORDER BY facturacion DESC
 
 ```sql
 --- --- Todos los clientes con su total de pedidos y fecha del último, incluyendo inactivos ('SIN PEDIDOS') mostrados al principio
-SELECT p.product_name AS producto,
-c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+SELECT 
+c.company_name AS cliente,
+c.country AS pais,
+COUNT(o.order_id) AS num_pedidos,
+COALESCE(CAST(MAX(order_date) AS VARCHAR),'SIN PEDIDOS') AS ultimo_pedido
+FROM customers c
+LEFT JOIN orders o
+USING(customer_id)
+GROUP BY c.company_name, c.country
+ORDER BY num_pedidos
 ```
 **Resultado:**
 
-![4](img/p04.png)
+![7](img/p07.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:** He utilizado un `LEFT JOIN` para incluir a todos los clientes, tengan pedidos o no, y he agrupado por cliente y país. Usé `COUNT` para obtener el total de pedidos (que devuelve 0 si no hay) y `MAX` para extraer la fecha de compra más reciente. Esta fecha la he convertido a texto con `CAST` y la he envuelto en un `COALESCE` para mostrar 'SIN PEDIDOS' en caso de ser nula. Finalmente, ordené por el número de pedidos para dejar a los inactivos al principio.
 
 ## Pregunta 8 — Organigrama de la fuerza de ventas
 
@@ -182,18 +186,20 @@ FROM products p
 
 ```sql
 --- --- Empleados con su cargo y los datos de su responsable directo, indicando 'DIRECCIÓN GENERAL' si no tienen superior
-SELECT p.product_name AS producto,
-c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+SELECT
+CONCAT(emp.first_name, ' ', emp.last_name) AS empleado,
+emp.title AS cargo,
+COALESCE(CONCAT(jefe.first_name, ' ', jefe.last_name), 'DIRECCIÓN GENERAL') AS responsable,
+jefe.title AS cargo_responsable
+FROM employees emp
+LEFT JOIN employees jefe
+ON emp.reports_to=jefe.employee_id
 ```
 **Resultado:**
 
-![4](img/p04.png)
+![8](img/p08.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:** He realizado un *self-join* (uniendo la tabla `employees` consigo misma) mediante un `LEFT JOIN` para asegurar que el empleado que no tiene jefe no desaparezca de la lista. He utilizado la función `CONCAT` para unir el nombre y apellido en una sola columna, y he aplicado un `COALESCE` para detectar al empleado que no reporta a nadie y sustituir el valor nulo por el literal 'DIRECCIÓN GENERAL'.
 
 ## Pregunta 9 — Rejilla de cobertura categoría × año
 
@@ -202,18 +208,13 @@ FROM products p
 
 ```sql
 --- --- Todas las combinaciones posibles de categorías y años con su respectiva facturación, ordenado por categoría y año
-SELECT p.product_name AS producto,
-c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+
 ```
 **Resultado:**
 
 ![4](img/p04.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:** No he sabido
 
 ## Pregunta 10 — Mapa de países: clientes frente a proveedores
 
@@ -222,18 +223,28 @@ FROM products p
 
 ```sql
 --- --- Número de clientes y proveedores por país, incluyendo aquellos donde solo existe uno de los dos
-SELECT p.product_name AS producto,
-c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+SELECT 
+    COALESCE(c.country, s.country) AS pais,
+    COUNT(DISTINCT c.customer_id) AS num_clientes,
+    COUNT(DISTINCT s.supplier_id) AS num_proveedores,
+    CASE 
+        WHEN COUNT(DISTINCT c.customer_id) > 0 AND COUNT(DISTINCT s.supplier_id) > 0 THEN 'AMBOS'
+        WHEN COUNT(DISTINCT c.customer_id) > 0 THEN 'SOLO CLIENTES'
+        ELSE 'SOLO PROVEEDORES'
+    END AS tipo_presencia
+FROM customers c
+FULL JOIN suppliers s 
+    ON c.country = s.country
+GROUP BY 
+    COALESCE(c.country, s.country)
+ORDER BY 
+    pais;
 ```
 **Resultado:**
 
-![4](img/p04.png)
+![10](img/p10.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:** He utilizado un `FULL JOIN` entre las tablas de clientes y proveedores cruzándolas por el país, lo que garantiza que no se pierda ningún territorio. Agrupé los resultados utilizando un `COALESCE` sobre el país para unificar ambos orígenes y calculé los totales con `COUNT(DISTINCT)`. Además, he incorporado una estructura `CASE` para clasificar el tipo de presencia comercial según existan clientes, proveedores o ambos, ordenando finalmente el listado por país.axis USING, lo que simplifica **Comentario:** He utilizado un `FULL JOIN` entre las tablas de clientes y proveedores cruzándolas por el país, lo que garantiza que no se pierda ningún territorio. Agrupé los resultados utilizando un `COALESCE` sobre el país para unificar ambos orígenes y calculé los totales con `COUNT(DISTINCT)`. Además, he incorporado una estructura `CASE` para clasificar el tipo de presencia comercial según existan clientes, proveedores o ambos, ordenando finalmente el listado por país.
 
 ## Pregunta 11 — Directorio unificado de contactos
 
