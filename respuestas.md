@@ -102,18 +102,27 @@ ORDER BY pais, producto
 
 ```sql
 -- -- Desglose de un pedido específico con cliente, fecha, productos y cálculo del importe final por línea
-SELECT p.product_name AS producto,
-c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+SELECT
+c.company_name AS cliente,
+o.order_date AS fecha_pedido,
+p.product_name AS product,
+ROUND((od.unit_price::numeric) * quantity * (1 - od.discount::numeric), 2) AS precio_unitario,
+od.quantity AS cantidad,
+od.discount AS descuento
+FROM customers c
+INNER JOIN orders o
+USING(customer_id)
+INNER JOIN order_details od
+USING(order_id)
+INNER JOIN products p
+USING(product_id)
+WHERE o.order_id = 10248
 ```
 **Resultado:**
 
-![4](img/p04.png)
+![5](img/p05.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:** He enlazado las cuatro tablas necesarias mediante INNER JOIN utilizando la cláusula USING, aprovechando que las columnas clave se llaman igual en todas ellas. Para calcular el importe final de cada línea, he multiplicado el precio por la cantidad aplicándole el descuento, y he utilizado ::numeric junto con ROUND() para asegurar que el resultado quede limpio con dos decimales. Por último, he filtrado con WHERE para mostrar únicamente los datos del pedido 10248.
 
 ## Pregunta 6 — Ranking de categorías por facturación
 
@@ -122,18 +131,27 @@ FROM products p
 
 ```sql
 --- --- Facturación histórica, líneas de pedido y productos distintos por categoría (solo superiores a 100.000€), ordenado de mayor a menor
-SELECT p.product_name AS producto,
+SELECT
 c.category_name AS categoria,
-s.company_name AS proveedor,
-s.country AS pais,
-s.city AS ciudad
-FROM products p
+COUNT(DISTINCT o.order_id) AS num_lineas,
+COUNT(DISTINCT p.product_id) AS num_productos,
+SUM(ROUND((od.unit_price::numeric) * quantity * (1 - od.discount::numeric), 2)) AS facturacion
+FROM categories c
+INNER JOIN products p
+USING(category_id)
+INNER JOIN order_details od
+USING(product_id)
+INNER JOIN orders o
+USING(order_id)
+GROUP BY c.category_name
+HAVING SUM(ROUND((od.unit_price::numeric) * quantity * (1 - od.discount::numeric), 2)) > 100000
+ORDER BY facturacion DESC
 ```
 **Resultado:**
 
-![4](img/p04.png)
+![6](img/p06.png)
 
-**Comentario:** He unido las tres tablas mediante INNER JOIN utilizando la sintaxis USING, lo que simplifica el código al tener el mismo nombre de ID en ambas tablas. Después, usé IN para 
+**Comentario:**  He unido las cuatro tablas con INNER JOIN y la sintaxis USING, agrupando después los resultados por categoría. He utilizado COUNT(DISTINCT) para asegurar que cuento pedidos y productos únicos, y he calculado la facturación total multiplicando precio por cantidad menos descuento, casteando a numeric y redondeando a dos decimales. Finalmente, usé HAVING para filtrar solo aquellas categorías cuya suma supera los 100.000, y ordené el resultado de mayor a menor facturación. 
 
 # Sección 3. Uniones externas, reflexivas y cruzadas
 
