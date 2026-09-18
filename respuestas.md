@@ -63,7 +63,7 @@ WHERE
 
 **Resultado:**
 
-![3](img/p03.png)
+![3](img/P03.png)
 
 **Comentario:** He filtrado en el WHERE los productos activos con el stock al límite o por debajo del nivel de reposición. Además, he utilizado una estructura CASE para generar la nueva columna de alerta, marcando 'CRÍTICO' si el stock es 0 y 'AVISO' en el resto de casos.
 
@@ -120,7 +120,7 @@ WHERE o.order_id = 10248
 ```
 **Resultado:**
 
-![5](img/p05.png)
+![5](img/p05.PNG)
 
 **Comentario:** He enlazado las cuatro tablas necesarias mediante INNER JOIN utilizando la cláusula USING, aprovechando que las columnas clave se llaman igual en todas ellas. Para calcular el importe final de cada línea, he multiplicado el precio por la cantidad aplicándole el descuento, y he utilizado ::numeric junto con ROUND() para asegurar que el resultado quede limpio con dos decimales. Por último, he filtrado con WHERE para mostrar únicamente los datos del pedido 10248.
 
@@ -149,7 +149,7 @@ ORDER BY facturacion DESC
 ```
 **Resultado:**
 
-![6](img/p06.png)
+![6](img/p06.PNG)
 
 **Comentario:**  He unido las cuatro tablas con INNER JOIN y la sintaxis USING, agrupando después los resultados por categoría. He utilizado COUNT(DISTINCT) para asegurar que cuento pedidos y productos únicos, y he calculado la facturación total multiplicando precio por cantidad menos descuento, casteando a numeric y redondeando a dos decimales. Finalmente, usé HAVING para filtrar solo aquellas categorías cuya suma supera los 100.000, y ordené el resultado de mayor a menor facturación. 
 
@@ -175,7 +175,7 @@ ORDER BY num_pedidos
 ```
 **Resultado:**
 
-![7](img/p07.png)
+![7](img/P07.PNG)
 
 **Comentario:** He utilizado un `LEFT JOIN` para incluir a todos los clientes, tengan pedidos o no, y he agrupado por cliente y país. Usé `COUNT` para obtener el total de pedidos (que devuelve 0 si no hay) y `MAX` para extraer la fecha de compra más reciente. Esta fecha la he convertido a texto con `CAST` y la he envuelto en un `COALESCE` para mostrar 'SIN PEDIDOS' en caso de ser nula. Finalmente, ordené por el número de pedidos para dejar a los inactivos al principio.
 
@@ -197,7 +197,7 @@ ON emp.reports_to=jefe.employee_id
 ```
 **Resultado:**
 
-![8](img/p08.png)
+![8](img/P08.PNG)
 
 **Comentario:** He realizado un *self-join* (uniendo la tabla `employees` consigo misma) mediante un `LEFT JOIN` para asegurar que el empleado que no tiene jefe no desaparezca de la lista. He utilizado la función `CONCAT` para unir el nombre y apellido en una sola columna, y he aplicado un `COALESCE` para detectar al empleado que no reporta a nadie y sustituir el valor nulo por el literal 'DIRECCIÓN GENERAL'.
 
@@ -257,7 +257,7 @@ ORDER BY
 ```
 **Resultado:**
 
-![10](img/p10.png)
+![10](img/P10.png)
 
 **Comentario:** He utilizado un `FULL JOIN` entre las tablas de clientes y proveedores cruzándolas por el país, lo que garantiza que no se pierda ningún territorio. Agrupé los resultados utilizando un `COALESCE` sobre el país para unificar ambos orígenes y calculé los totales con `COUNT(DISTINCT)`. Además, he incorporado una estructura `CASE` para clasificar el tipo de presencia comercial según existan clientes, proveedores o ambos, ordenando finalmente el listado por país.axis USING, lo que simplifica **Comentario:** He utilizado un `FULL JOIN` entre las tablas de clientes y proveedores cruzándolas por el país, lo que garantiza que no se pierda ningún territorio. Agrupé los resultados utilizando un `COALESCE` sobre el país para unificar ambos orígenes y calculé los totales con `COUNT(DISTINCT)`. Además, he incorporado una estructura `CASE` para clasificar el tipo de presencia comercial según existan clientes, proveedores o ambos, ordenando finalmente el listado por país.
 
