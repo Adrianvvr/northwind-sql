@@ -33,8 +33,8 @@ psql -U postgres -d northwind -f C:\ruta\a\tu\archivo\northwind.sql
 ## Diagrama Entidad-Relación
 A continuación se muestra el modelo relacional generado mediante ingeniería inversa desde pgAdmin tras la carga de datos:
 
-![Diagrama ER de Northwind](diagrama_er.png)
-*(Nota: Asegúrate de guardar la imagen exportada en la misma carpeta que este README con el nombre diagrama_er.png).*
+![Diagrama ER de Northwind](img/diagrama-er.png)
+ 
 
 ## Índice de Contenidos
 * [Resolución de las 20 consultas de análisis (respuestas.md)](respuestas.md)
