@@ -37,4 +37,4 @@ A continuación se muestra el modelo relacional generado mediante ingeniería in
  
 
 ## Índice de Contenidos
-* [Resolución de las 20 consultas de análisis (respuestas.md)](respuestas.md)
+*  [Resolución de las 20 consultas de análisis (respuestas.md)](respuestas.md)
